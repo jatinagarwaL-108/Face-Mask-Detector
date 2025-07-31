@@ -6,13 +6,19 @@ from PIL import Image
 import os
 import gdown
 
-model_file = "face_detect_model1.h5"
+MODEL_PATH = "face_detect_model1.h5"
+MODEL_URL = "https://drive.google.com/uc?id=1faU_ThFAiQxuWU2eSKGBHkmIsnugNMvR"
 
-if not os.path.exists(model_file):
-    url = "https://drive.google.com/uc?id=1faU_ThFAiQxuWU2eSKGBHkmIsnugNMvR"
-    gdown.download(url, model_file, quiet=False)
+if not os.path.exists(MODEL_PATH):
+    with st.spinner("Downloading model..."):
+        gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
 
-model = tf.keras.models.load_model(model_file)
+@st.cache_resource
+def load_model():
+    return tf.keras.models.load_model(MODEL_PATH)
+
+model = load_model()
+
 haar = cv2.CascadeClassifier("haarcascade_frontalface_default (1).xml")
 
 # Face detection
