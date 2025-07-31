@@ -1,4 +1,2 @@
-# Face-Mask-Detector
-
-# this is demo of my project
+#link for demo
 https://face-mask-detector-47oc8ayxcbam2j3wy7onkj.streamlit.app/
