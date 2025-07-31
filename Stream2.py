@@ -8,7 +8,7 @@ import gdown
 
 model_path = "face_detect_model1.h5"
 if not os.path.exists(model_path):
-    file_id = "1faU_ThFAiQxuWU2eSKGBHkmIsnugNMvR" 
+    file_id = "1faU_ThFAiQxuWU2eSKGBHkmIsnugNMvR"
     url = f"https://drive.google.com/file/d/1faU_ThFAiQxuWU2eSKGBHkmIsnugNMvR/view?usp=drive_link"
     gdown.download(url, model_path, quiet=False)
 
@@ -40,31 +40,27 @@ st.sidebar.title("Choose Mode")
 mode = st.sidebar.radio("Select input type", ["📷 Live Webcam", "🖼️ Upload Image"])
 
 if mode == "📷 Live Webcam":
-    run = st.checkbox('Start Webcam')
-
+    img_file = st.camera_input("Take a photo")
     FRAME_WINDOW = st.image([])
+    if img_file is not None:
+        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
+        frame = cv2.imdecode(file_bytes, 1)
 
-    if run:
-        cap = cv2.VideoCapture(0)
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
+        resized = cv2.resize(frame, (224, 224))
+        pred = detect_image(resized)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = detect_face(gray)
 
-            resized_img = cv2.resize(frame, (224, 224))
-            y_pred = detect_image(resized_img)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = detect_face(gray)
+        for x, y, w, h in faces:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), color=(255, 0, 0), thickness=3)
 
-            for x, y, w, h in faces:
-                cv2.rectangle(frame, (x, y), (x + w, y + h), color=(255, 0, 0), thickness=3)
+        if pred < 1e-2:
+            draw_label(frame, "with_Mask", (30, 30), (0, 255, 0))
+        else:
+            draw_label(frame, "without_mask", (30, 30), (0, 0, 255))
 
-            if y_pred < 1e-2:
-                draw_label(frame, "with_Mask", (30, 30), (0, 255, 0))
-            else:
-                draw_label(frame, "without_mask", (30, 30), (0, 0, 255))
+        FRAME_WINDOW.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
-            FRAME_WINDOW.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 else:
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
     if uploaded_file is not None:
