@@ -3,8 +3,15 @@ import numpy as np
 import tensorflow as tf
 import streamlit as st
 from PIL import Image
+import os
+import gdown
 
-# Load your model and Haar cascade
+model_path = "face_detect_model1.h5"
+if not os.path.exists(model_path):
+    file_id = "1faU_ThFAiQxuWU2eSKGBHkmIsnugNMvR" 
+    url = f"https://drive.google.com/file/d/1faU_ThFAiQxuWU2eSKGBHkmIsnugNMvR/view?usp=drive_link"
+    gdown.download(url, model_path, quiet=False)
+
 model = tf.keras.models.load_model("face_detect_model1.h5")
 haar = cv2.CascadeClassifier("haarcascade_frontalface_default (1).xml")
 
@@ -74,11 +81,9 @@ else:
             cv2.rectangle(display_img, (x, y), (x + w, y + h), color=(255, 0, 0), thickness=3)
 
         if y_pred < 1e-2:
-            # draw_label(display_img, "with_Mask", (30, 30), (0, 255, 0))
             st.markdown("<h2 style='color:green; text-align:center;'>😷 Person is wearing a Mask</h2>",
                         unsafe_allow_html=True)
         else:
-            # draw_label(display_img, "without_mask", (30, 30), (0, 0, 255))
             st.markdown("<h2 style='color:red; text-align:center;'>❌ Person is NOT wearing a Mask</h2>",
                         unsafe_allow_html=True)
 
